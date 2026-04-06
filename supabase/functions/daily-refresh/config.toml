@@ -1,0 +1,20 @@
+# Supabase Edge Function configuration for daily-refresh
+# Docs: https://supabase.com/docs/guides/functions/schedule-functions
+#
+# Cron expression: "0 13 * * *"
+#   ┌─ min  (0)
+#   │  ┌─ hour (13 UTC = 7 AM MT / 6 AM MDT)
+#   │  │  ┌─ day-of-month (*)
+#   │  │  │  ┌─ month (*)
+#   │  │  │  │  ┌─ day-of-week (*)
+#   0  13  *  *  *
+
+[functions.daily-refresh]
+enabled  = true
+
+# JWT verification disabled — this function is triggered by the scheduler,
+# not by authenticated client requests.
+verify_jwt = false
+
+# Schedule: every day at 13:00 UTC (7:00 AM MT, 6:00 AM MDT)
+schedule = "0 13 * * *"
