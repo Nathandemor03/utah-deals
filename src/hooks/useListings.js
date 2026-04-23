@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { fetchSaleListings } from '../lib/mlsApi';
 import { transformListing } from '../lib/transformListing';
 
-const CACHE_KEY = 'utah_deals_listings_v2';
+const CACHE_KEY = 'utah_deals_listings_v3';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 function loadCache() {

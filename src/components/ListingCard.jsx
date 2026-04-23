@@ -31,7 +31,7 @@ const VERDICT_BADGE = {
 
 const VERDICT_LABELS = {
   buy:   'Strong Buy',
-  watch: 'Watch',
+  watch: 'Worth a Look',
   pass:  'Pass',
 };
 
@@ -115,7 +115,7 @@ export default function ListingCard({ listing, isSaved, onSave, onClick }) {
             <p className="text-xs text-slate-400 leading-tight italic">Open for rent est.</p>
           )}
           {verdict && (
-            <span className={`inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${VERDICT_BADGE[verdict]}`}>
+            <span className={`inline-block mt-1 text-xs font-bold px-2.5 py-1 rounded-full ${VERDICT_BADGE[verdict]}`}>
               {VERDICT_LABELS[verdict]}
             </span>
           )}

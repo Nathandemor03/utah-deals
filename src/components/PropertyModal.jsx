@@ -125,23 +125,58 @@ function PhotoGallery({ photos, fallbackType, fallbackAddress }) {
 
 // ─── Scenario Slider ───────────────────────────────────────────────────────────
 
-function ScenarioSlider({ label, value, min, max, step, format, onChange }) {
+// displayValue / parseInput handle the unit conversion between internal value and
+// what the user types (e.g. 0.70 ↔ "70" for LTV, 2800 ↔ "2800" for rent).
+function ScenarioSlider({ label, value, min, max, step, suffix, displayValue, parseInput, onChange }) {
+  const toDisplay = displayValue ? displayValue(value) : value;
+  const [inputVal, setInputVal] = useState(String(toDisplay));
+
+  // Sync input when slider moves
+  useEffect(() => {
+    setInputVal(String(displayValue ? displayValue(value) : value));
+  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function commit(str) {
+    const num = parseFloat(str);
+    if (isNaN(num)) { setInputVal(String(displayValue ? displayValue(value) : value)); return; }
+    const internal = parseInput ? parseInput(num) : num;
+    const clamped = Math.min(max, Math.max(min, internal));
+    onChange(clamped);
+    setInputVal(String(displayValue ? displayValue(clamped) : clamped));
+  }
+
   return (
     <div className="space-y-1">
-      <div className="flex justify-between items-baseline">
+      <div className="flex justify-between items-center">
         <label className="text-xs font-medium text-slate-600">{label}</label>
-        <span className="text-sm font-semibold text-slate-800">{format(value)}</span>
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            inputMode="decimal"
+            value={inputVal}
+            onChange={(e) => setInputVal(e.target.value)}
+            onBlur={(e) => commit(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+            className="w-24 text-right text-sm font-semibold text-slate-800 bg-white border border-slate-200 rounded-md px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-300 [appearance:textfield]"
+          />
+          {suffix && <span className="text-xs text-slate-400">{suffix}</span>}
+        </div>
       </div>
       <input
         type="range"
-        min={min} max={max} step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
+        min={displayValue ? displayValue(min) : min}
+        max={displayValue ? displayValue(max) : max}
+        step={displayValue ? displayValue(step) : step}
+        value={toDisplay}
+        onChange={(e) => {
+          const internal = parseInput ? parseInput(Number(e.target.value)) : Number(e.target.value);
+          onChange(internal);
+        }}
         className="w-full h-1.5 rounded-full accent-blue-600 cursor-pointer"
       />
       <div className="flex justify-between text-[10px] text-slate-400">
-        <span>{format(min)}</span>
-        <span>{format(max)}</span>
+        <span>{displayValue ? displayValue(min) : min}{suffix}</span>
+        <span>{displayValue ? displayValue(max) : max}{suffix}</span>
       </div>
     </div>
   );
@@ -381,24 +416,26 @@ export default function PropertyModal({ listing, isSaved, onSave, onClose, notes
               <ScenarioSlider
                 label="Monthly Rent"
                 value={scenarioRent}
-                min={Math.round(scenarioRent * 0.5 / 50) * 50}
-                max={Math.round(scenarioRent * 2.0 / 50) * 50}
-                step={50}
-                format={(v) => fmtUSD(v) + '/mo'}
+                min={500} max={10000} step={50}
+                suffix="/mo"
                 onChange={setScenarioRent}
               />
               <ScenarioSlider
                 label="LTV"
                 value={scenarioLTV}
                 min={0.55} max={0.80} step={0.01}
-                format={(v) => fmtPct(v)}
+                suffix="%"
+                displayValue={(v) => Math.round(v * 100)}
+                parseInput={(n) => n / 100}
                 onChange={setScenarioLTV}
               />
               <ScenarioSlider
                 label="Interest Rate"
                 value={scenarioRate}
                 min={0.04} max={0.10} step={0.0025}
-                format={(v) => fmtPct2(v)}
+                suffix="%"
+                displayValue={(v) => parseFloat((v * 100).toFixed(2))}
+                parseInput={(n) => n / 100}
                 onChange={setScenarioRate}
               />
             </div>

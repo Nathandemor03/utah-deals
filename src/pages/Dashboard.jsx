@@ -198,6 +198,38 @@ export default function Dashboard() {
             <p className="text-lg font-medium text-slate-600">No listings match</p>
             <p className="text-sm">Try a different tab or filter.</p>
           </div>
+        ) : activeTab === 'all' ? (
+          // Grouped view — Strong Buys → Worth a Look → Pass
+          <div className="space-y-8">
+            {[
+              { key: 'buy',   label: 'Strong Buys',   accent: 'text-emerald-700', bar: 'bg-emerald-500' },
+              { key: 'watch', label: 'Worth a Look',  accent: 'text-amber-700',   bar: 'bg-amber-400'  },
+              { key: 'pass',  label: 'Pass',          accent: 'text-slate-500',   bar: 'bg-slate-300'  },
+            ].map(({ key, label, accent, bar }) => {
+              const group = visible.filter((l) => l.verdict === key);
+              if (group.length === 0) return null;
+              return (
+                <div key={key}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-1 h-5 rounded-full ${bar}`} />
+                    <h2 className={`text-base font-bold ${accent}`}>{label}</h2>
+                    <span className="text-xs text-slate-400 font-medium">{group.length} listing{group.length !== 1 ? 's' : ''}</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {group.map((listing) => (
+                      <ListingCard
+                        key={listing.id}
+                        listing={listing}
+                        isSaved={savedIds.has(listing.id)}
+                        onSave={toggleSave}
+                        onClick={setSelected}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {visible.map((listing) => (

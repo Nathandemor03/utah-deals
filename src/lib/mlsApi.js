@@ -37,7 +37,12 @@ async function apiFetch(path, params = {}) {
  * @returns {Promise<object[]>} Raw Rentcast listing objects
  */
 export async function fetchSaleListings() {
-  if (USE_MOCK) return MOCK_SALE_LISTINGS;
+  if (USE_MOCK) return MOCK_SALE_LISTINGS.map((l) => ({
+    ...l,
+    rentEstimate:  MOCK_RENT_ESTIMATES[l.id]?.rent          ?? null,
+    rentRangeLow:  MOCK_RENT_ESTIMATES[l.id]?.rentRangeLow  ?? null,
+    rentRangeHigh: MOCK_RENT_ESTIMATES[l.id]?.rentRangeHigh ?? null,
+  }));
 
   const data = await apiFetch('/listings/sale', {
     state:        'UT',
